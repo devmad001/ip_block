@@ -10,6 +10,7 @@ import {
     Clock1,
     MousePointer,
     Globe,
+    Lock,
 } from "lucide-react";
 import {
     Card,
@@ -37,15 +38,11 @@ const fadeIn = (delay = 0) => ({
 });
 
 const STATS_CONFIG = [
-    { title: "Total Sessions", key: "sessions", icon: Satellite },
-    {
-        title: "Avg. Interactions",
-        key: "avgPagesPerSession",
-        icon: MousePointerClick,
-    },
-    { title: "Avg. Duration", key: "avgDuration", icon: Clock1 },
-    { title: "Page Views", key: "pageViews", icon: Layout },
-    { title: "Total Events", key: "events", icon: Users },
+    { title: "Total Visits", key: "totalVisits", icon: Users },
+    { title: "Blocked Visits", key: "blockedVisits", icon: Lock },
+    { title: "Bot Traffic", key: "botTraffic", icon: Satellite },
+    { title: "Same IP Visits", key: "sameIpVisits", icon: MousePointerClick },
+    { title: "Suspicious Activity", key: "suspiciousActivity", icon: FileText },
 ];
 
 const Dashboard = () => {
@@ -53,66 +50,18 @@ const Dashboard = () => {
 
     const [dashboardData, setDashboardData] = useState({
         overview: {
-            sessions: 1250,
-            avgPagesPerSession: 4.2,
-            avgDuration: "3m 25s",
-            pageViews: 4800,
-            events: 10500,
+            totalVisits: 5000,
+            blockedVisits: 200,
+            botTraffic: 100,
+            sameIpVisits: 50,
+            suspiciousActivity: 30,
         },
         events: [
-            {
-                id: "1",
-                createdAt: new Date().toISOString(),
-                data: { element: "A", href: "/home", text: "Home Link" },
-                session: {
-                    country: "USA",
-                    deviceType: "Desktop",
-                    browser: "Chrome",
-                },
-            },
-            {
-                id: "2",
-                createdAt: new Date().toISOString(),
-                data: { element: "BUTTON", text: "Sign Up" },
-                session: {
-                    country: "UK",
-                    deviceType: "Mobile",
-                    browser: "Safari",
-                },
-            },
-            {
-                id: "3",
-                createdAt: new Date().toISOString(),
-                data: { element: "NAVIGATION", href: "/dashboard" },
-                session: {
-                    country: "Canada",
-                    deviceType: "Tablet",
-                    browser: "Firefox",
-                },
-            },
-            {
-                id: "4",
-                createdAt: new Date().toISOString(),
-                data: { element: "A", href: "/pricing", text: "Pricing Page" },
-                session: {
-                    country: "Germany",
-                    deviceType: "Desktop",
-                    browser: "Edge",
-                },
-            },
-            {
-                id: "5",
-                createdAt: new Date().toISOString(),
-                data: { element: "BUTTON", text: "Contact Us" },
-                session: {
-                    country: "France",
-                    deviceType: "Mobile",
-                    browser: "Chrome",
-                },
-            },
+            // Sample events data
         ],
         loading: false,
     });
+
     useEffect(() => {
         if (!selectedWebsite?.id) return;
 
@@ -149,8 +98,8 @@ const Dashboard = () => {
             STATS_CONFIG.map((config) => ({
                 ...config,
                 value: dashboardData.overview?.[config.key] ?? "-",
-                metric: "2.4% ↓",
-                trend: "down",
+                metric: "2.4% ↑",
+                trend: "up",
             })),
         [dashboardData.overview],
     );
@@ -158,9 +107,10 @@ const Dashboard = () => {
     return (
         <div className="p-6 space-y-6">
             <div>
-                <h1 className="text-2xl font-bold">Interaction Analytics</h1>
+                <h1 className="text-2xl font-bold">IP Block Dashboard</h1>
                 <p className="text-muted-foreground">
-                    Real-time user interaction tracking and analysis
+                    Monitor and analyze suspicious and malicious traffic on your
+                    website.
                 </p>
             </div>
 
@@ -201,8 +151,10 @@ const Dashboard = () => {
             <motion.div {...fadeIn(0.4)}>
                 <RecentEventsTable
                     events={dashboardData.events.slice(0, 5)}
-                    title={"Recent Interactions"}
-                    description={"Latest user events captured in real-time"}
+                    title={"Recent Suspicious Activity"}
+                    description={
+                        "Latest suspicious or malicious activities detected"
+                    }
                     loading={dashboardData.loading}
                 />
             </motion.div>

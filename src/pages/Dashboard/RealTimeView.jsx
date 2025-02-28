@@ -1,4 +1,3 @@
-// app/dashboard/real-time/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -39,6 +38,7 @@ const initialData = [
         page: "/home",
         duration: 127,
         referrer: "Google",
+        ip: "192.168.1.1", // Simulating IP Address
     },
     {
         id: "2",
@@ -47,6 +47,7 @@ const initialData = [
         page: "/blog",
         duration: 45,
         referrer: "Twitter",
+        ip: "192.168.1.2",
     },
     {
         id: "3",
@@ -55,6 +56,7 @@ const initialData = [
         page: "/pricing",
         duration: 89,
         referrer: "Direct",
+        ip: "192.168.1.3",
     },
 ];
 
@@ -78,6 +80,7 @@ export default function RealTimePage() {
                 referrer: ["Google", "Twitter", "Direct", "Facebook"][
                     Math.floor(Math.random() * 4)
                 ],
+                ip: `192.168.1.${Math.floor(Math.random() * 10) + 1}`, // Simulating IP Address
             };
 
             setSessions((prev) => [newSession, ...prev.slice(0, 9)]);
@@ -87,12 +90,15 @@ export default function RealTimePage() {
         return () => clearInterval(interval);
     }, []);
 
-    const countryData = sessions.reduce((acc, session) => {
-        acc[session.country] = (acc[session.country] || 0) + 1;
+    // Group by IP address block (e.g., "192.168.1.x")
+    const ipBlockData = sessions.reduce((acc, session) => {
+        const ipBlock = session.ip.split(".").slice(0, 3).join("."); // Getting the first 3 octets as block
+        acc[ipBlock] = (acc[ipBlock] || 0) + 1;
         return acc;
     }, {});
 
-    const chartData = Object.entries(countryData).map(([name, count]) => ({
+    // Prepare the chart data
+    const chartData = Object.entries(ipBlockData).map(([name, count]) => ({
         name,
         count,
     }));
@@ -180,12 +186,12 @@ export default function RealTimePage() {
                         </Card>
                     </div>
 
-                    {/* Live Activity Map */}
+                    {/* IP Block Distribution Chart */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Geographic Distribution</CardTitle>
+                            <CardTitle>IP Block Distribution</CardTitle>
                             <CardDescription>
-                                Real-time visitor locations
+                                Real-time IP block distribution for visitors
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="h-64">

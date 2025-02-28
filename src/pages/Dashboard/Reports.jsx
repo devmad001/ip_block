@@ -1,7 +1,6 @@
-// app/dashboard/reports/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Card,
     CardContent,
@@ -9,7 +8,17 @@ import {
     CardTitle,
     CardDescription,
 } from "../../components/ui/card";
-import { useEffect } from "react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "../../components/ui/table";
+import ErrorMessage from "../../components/ui/errorMessage";
+import LoadingOverlay from "../../components/ui/loadingOverlay";
+import { useWebsite } from "../../contexts/websiteContext";
 import {
     BarChart,
     Bar,
@@ -19,171 +28,121 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "../../components/ui/table";
-import { useWebsite } from "../../contexts/websiteContext";
-import { websiteService } from "../../services/websiteService";
-import ErrorMessage from "../../components/ui/errorMessage";
-import LoadingOverlay from "../../components/ui/loadingOverlay";
+const ipVisitsData = [
+    { ip: "192.168.1.1", visits: 300 },
+    { ip: "198.51.100.12", visits: 120 },
+    { ip: "203.0.113.5", visits: 200 },
+];
 
-export default function Reports() {
+export default function IpBlockReport() {
     const { selectedWebsite } = useWebsite();
-    const [analyticsState, setAnalyticsState] = useState({
-        data: null,
-        loading: true,
+
+    // Dummy Data to be used for the report
+    const dummyData = {
+        totalVisits: 5000,
+        blockedIps: [
+            {
+                ip: "192.168.1.1",
+                country: "USA",
+                attempts: 15,
+                lastAccess: "2025-02-28 12:00:00",
+            },
+            {
+                ip: "172.16.0.1",
+                country: "Germany",
+                attempts: 8,
+                lastAccess: "2025-02-28 14:30:00",
+            },
+            {
+                ip: "203.0.113.5",
+                country: "India",
+                attempts: 20,
+                lastAccess: "2025-02-28 13:00:00",
+            },
+        ],
+        suspiciousActivity: [
+            {
+                ip: "192.168.1.1",
+                attempts: 15,
+                firstAttempt: "2025-02-28 10:00:00",
+                lastAttempt: "2025-02-28 12:00:00",
+            },
+            {
+                ip: "198.51.100.12",
+                attempts: 18,
+                firstAttempt: "2025-02-28 11:30:00",
+                lastAttempt: "2025-02-28 13:00:00",
+            },
+        ],
+        ipVisits: [
+            { ip: "192.168.1.1", visits: 300 },
+            { ip: "198.51.100.12", visits: 120 },
+            { ip: "203.0.113.5", visits: 200 },
+        ],
+    };
+
+    // State initialization
+    const [reportState, setReportState] = useState({
+        data: dummyData,
+        loading: false,
         error: null,
     });
 
+    // Simulate loading state
     useEffect(() => {
-        const controller = new AbortController();
-        const { signal } = controller;
-
-        const fetchAnalytics = async () => {
-            if (!selectedWebsite?.id) {
-                setAnalyticsState({ data: null, loading: false, error: null });
-                return;
-            }
-
-            setAnalyticsState((prev) => ({
-                ...prev,
-                loading: true,
-                error: null,
-            }));
-
-            try {
-                const rawData = await websiteService.getPageViewsData(
-                    selectedWebsite.id,
-                );
-                const processedData = processAnalyticsData(rawData);
-
-                if (!signal.aborted) {
-                    setAnalyticsState({
-                        data: processedData,
-                        loading: false,
-                        error: null,
-                    });
-                }
-            } catch (error) {
-                if (!signal.aborted) {
-                    setAnalyticsState({
-                        data: null,
-                        loading: false,
-                        error: error.message || "Failed to load analytics data",
-                    });
-                }
-            }
-        };
-
-        fetchAnalytics();
-
-        return () => controller.abort();
+        setReportState({
+            data: dummyData,
+            loading: false,
+            error: null,
+        });
     }, [selectedWebsite?.id]);
 
-    if (analyticsState.loading) {
+    if (reportState.loading) {
         return <LoadingOverlay />;
     }
 
-    if (analyticsState.error) {
-        return <ErrorMessage message={analyticsState.error} />;
+    if (reportState.error) {
+        return <ErrorMessage message={reportState.error} />;
     }
 
     return (
         <div className="p-6 space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+                    <h1 className="text-2xl font-bold">IP Block Report</h1>
                     <p className="text-muted-foreground">
-                        Real-time visitor insights
+                        Insights into IP-related traffic and blocked access
                     </p>
                 </div>
             </div>
 
-            <KeyMetrics metrics={analyticsState.data} />
+            <KeyMetrics metrics={reportState.data} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <DeviceChart devices={analyticsState.data.devices} />
-                <LocationTable locations={analyticsState.data.locations} />
+                <IpVisitsChart ipVisits={reportState.data.ipVisits} />
+                <SuspiciousActivityTable
+                    activities={reportState.data.suspiciousActivity}
+                />
             </div>
 
-            <TopPages pages={analyticsState.data.topPages} />
+            <BlockedIpsTable blockedIps={reportState.data.blockedIps} />
         </div>
     );
 }
 
-export const processAnalyticsData = (events) => {
-    const uniqueSessions = new Set(events.map((event) => event.sessionId));
-    const devices = events.reduce((acc, event) => {
-        const { deviceType } = event.session;
-        acc[deviceType] = (acc[deviceType] || 0) + 1;
-        return acc;
-    }, {});
-
-    const locations = events.reduce((acc, event) => {
-        const { country } = event.session;
-        acc[country] = (acc[country] || 0) + 1;
-        return acc;
-    }, {});
-
-    const paths = events.reduce((acc, event) => {
-        acc[event.path] = (acc[event.path] || 0) + 1;
-        return acc;
-    }, {});
-
-    return {
-        totalVisitors: events.length,
-        uniqueVisitors: uniqueSessions.size,
-        devices: Object.entries(devices).map(([device, visitors]) => ({
-            device,
-            visitors,
-        })),
-        locations: Object.entries(locations).map(([country, visitors]) => ({
-            country,
-            visitors,
-            duration: "2m 30s", // Mock duration since not provided in data
-        })),
-        topPages: Object.entries(paths)
-            .map(([page, visitors]) => ({
-                page,
-                visitors,
-                bounceRate: Math.floor(Math.random() * 60) + 20,
-                conversions: Math.floor(visitors * 0.1),
-            }))
-            .sort((a, b) => b.visitors - a.visitors)
-            .slice(0, 5),
-    };
-};
-
+// Key Metrics Component
 export const KeyMetrics = ({ metrics }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Total Views
+                        Total Visits
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="text-3xl font-bold">
-                        {metrics.totalVisitors.toLocaleString()}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">
-                        Unique Visitors
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-3xl font-bold">
-                        {metrics.uniqueVisitors.toLocaleString()}
+                        {metrics.totalVisits}
                     </div>
                 </CardContent>
             </Card>
@@ -191,61 +150,71 @@ export const KeyMetrics = ({ metrics }) => {
     );
 };
 
-export const DeviceChart = ({ devices }) => {
+// IP Visits Chart Component
+export const IpVisitsChart = ({ ipVisits }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Device Breakdown</CardTitle>
+                <CardTitle>IP Visits Overview</CardTitle>
                 <CardDescription>
-                    Visitor distribution by platform
+                    Visit counts from different IP addresses
                 </CardDescription>
             </CardHeader>
-            <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={devices}>
-                        <CartesianGrid
-                            strokeDasharray="3 3"
-                            className="stroke-muted"
-                        />
-                        <XAxis dataKey="device" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar
-                            dataKey="visitors"
-                            fill="hsl(var(--primary))"
-                            radius={[4, 4, 0, 0]}
-                        />
-                    </BarChart>
-                </ResponsiveContainer>
+            <CardContent>
+                {/* Add your chart here */}
+
+                <BarChart data={ipVisits}>
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-muted"
+                    />
+                    <XAxis dataKey="ip" stroke="#64748b" />
+                    <YAxis stroke="#64748b" />
+                    <Tooltip
+                        contentStyle={{
+                            backgroundColor: "hsl(var(--background))",
+                            borderColor: "hsl(var(--border))",
+                            borderRadius: "8px",
+                        }}
+                    />
+                    <Bar
+                        dataKey="visits"
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                    />
+                </BarChart>
             </CardContent>
         </Card>
     );
 };
 
-export const LocationTable = ({ locations }) => {
+// Suspicious Activity Table Component
+export const SuspiciousActivityTable = ({ activities }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Geographic Distribution</CardTitle>
-                <CardDescription>Top visitor locations</CardDescription>
+                <CardTitle>Suspicious Activity</CardTitle>
+                <CardDescription>
+                    Possible malicious activity detected based on IP behavior
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Country</TableHead>
-                            <TableHead>Visitors</TableHead>
-                            <TableHead>Avg. Duration</TableHead>
+                            <TableHead>IP Address</TableHead>
+                            <TableHead>Attempts</TableHead>
+                            <TableHead>First Attempt</TableHead>
+                            <TableHead>Last Attempt</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {locations.map((location) => (
-                            <TableRow key={location.country}>
-                                <TableCell>{location.country}</TableCell>
-                                <TableCell>
-                                    {location.visitors.toLocaleString()}
-                                </TableCell>
-                                <TableCell>{location.duration}</TableCell>
+                        {activities.map((activity) => (
+                            <TableRow key={activity.ip}>
+                                <TableCell>{activity.ip}</TableCell>
+                                <TableCell>{activity.attempts}</TableCell>
+                                <TableCell>{activity.firstAttempt}</TableCell>
+                                <TableCell>{activity.lastAttempt}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -255,46 +224,33 @@ export const LocationTable = ({ locations }) => {
     );
 };
 
-export const TopPages = ({ pages }) => {
+// Blocked IPs Table Component
+export const BlockedIpsTable = ({ blockedIps }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Top Performing Pages</CardTitle>
+                <CardTitle>Blocked IPs</CardTitle>
                 <CardDescription>
-                    Most visited pages with engagement metrics
+                    IPs that have been blocked due to suspicious behavior
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Page</TableHead>
-                            <TableHead>Visitors</TableHead>
-                            <TableHead>Bounce Rate</TableHead>
-                            <TableHead>Conversions</TableHead>
+                            <TableHead>IP Address</TableHead>
+                            <TableHead>Country</TableHead>
+                            <TableHead>Attempts</TableHead>
+                            <TableHead>Last Access</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {pages.map((page) => (
-                            <TableRow key={page.page}>
-                                <TableCell>{page.page}</TableCell>
-                                <TableCell>
-                                    {page.visitors.toLocaleString()}
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center gap-2">
-                                        {page.bounceRate}%
-                                        <div className="w-20 h-2 bg-muted rounded-full">
-                                            <div
-                                                className="h-2 bg-primary rounded-full"
-                                                style={{
-                                                    width: `${page.bounceRate}%`,
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{page.conversions}</TableCell>
+                        {blockedIps.map((ip) => (
+                            <TableRow key={ip.ip}>
+                                <TableCell>{ip.ip}</TableCell>
+                                <TableCell>{ip.country}</TableCell>
+                                <TableCell>{ip.attempts}</TableCell>
+                                <TableCell>{ip.lastAccess}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
