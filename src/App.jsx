@@ -6,7 +6,8 @@ import LayoutWithSidebar from "./layouts/LayoutWithSidebar";
 import ProtectedRoute from "./middlewares/ProtectedRoute.jsx";
 import SignUp from "./pages/auth/Siginup";
 import SignIn from "./pages/auth/Signin";
-import { Toaster } from "sonner";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import LayoutWithPublicHeader from "./layouts/LayoutWithPublicHeader";
 import { AuthProvider } from "./contexts/authContext";
 import UnProtectedRoute from "./middlewares/UnprotectedRoute";
@@ -25,7 +26,18 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
         <AuthProvider>
             <WebsiteProvider>
-                <Toaster />
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                />
                 <Router>
                     <Routes>
                         <Route element={<LayoutWithPublicHeader />}>

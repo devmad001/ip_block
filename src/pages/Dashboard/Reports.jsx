@@ -28,6 +28,12 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Plus, Ban, Unlock, AlertTriangle } from "lucide-react";
+import { ipBlockService } from "../../services/ipBlockService";
+import { toast } from "react-toastify";
+
 const ipVisitsData = [
     { ip: "192.168.1.1", visits: 300 },
     { ip: "198.51.100.12", visits: 120 },
@@ -36,6 +42,8 @@ const ipVisitsData = [
 
 export default function IpBlockReport() {
     const { selectedWebsite } = useWebsite();
+    const [newIp, setNewIp] = useState("");
+    const [blockReason, setBlockReason] = useState("");
 
     // Dummy Data to be used for the report
     const dummyData = {
@@ -88,13 +96,79 @@ export default function IpBlockReport() {
         error: null,
     });
 
-    // Simulate loading state
+    const handleBlockIp = async () => {
+        try {
+            await ipBlockService.blockIp(selectedWebsite.id, {
+                ip: newIp,
+                reason: blockReason,
+            });
+            toast({
+                title: "IP Blocked",
+                description: `Successfully blocked IP address: ${newIp}`,
+            });
+            // Refresh data
+            fetchData();
+            setNewIp("");
+            setBlockReason("");
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to block IP address",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleUnblockIp = async (ip) => {
+        try {
+            await ipBlockService.unblockIp(selectedWebsite.id, ip);
+            toast({
+                title: "IP Unblocked",
+                description: `Successfully unblocked IP address: ${ip}`,
+            });
+            // Refresh data
+            fetchData();
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to unblock IP address",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const fetchData = async () => {
+        if (!selectedWebsite?.id) return;
+
+        setReportState((prev) => ({ ...prev, loading: true }));
+        try {
+            const [blockedIps, stats, rules] = await Promise.all([
+                ipBlockService.getBlockedIps(selectedWebsite.id),
+                ipBlockService.getBlockStats(selectedWebsite.id),
+                ipBlockService.getBlockRules(selectedWebsite.id),
+            ]);
+
+            setReportState({
+                data: {
+                    ...reportState.data,
+                    blockedIps,
+                    stats,
+                    rules,
+                },
+                loading: false,
+                error: null,
+            });
+        } catch (error) {
+            setReportState((prev) => ({
+                ...prev,
+                loading: false,
+                error: "Failed to fetch IP block data",
+            }));
+        }
+    };
+
     useEffect(() => {
-        setReportState({
-            data: dummyData,
-            loading: false,
-            error: null,
-        });
+        fetchData();
     }, [selectedWebsite?.id]);
 
     if (reportState.loading) {
@@ -114,6 +188,22 @@ export default function IpBlockReport() {
                         Insights into IP-related traffic and blocked access
                     </p>
                 </div>
+                <div className="flex items-center gap-2">
+                    <Input
+                        placeholder="Enter IP address"
+                        value={newIp}
+                        onChange={(e) => setNewIp(e.target.value)}
+                    />
+                    <Input
+                        placeholder="Block reason"
+                        value={blockReason}
+                        onChange={(e) => setBlockReason(e.target.value)}
+                    />
+                    <Button onClick={handleBlockIp}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Block IP
+                    </Button>
+                </div>
             </div>
 
             <KeyMetrics metrics={reportState.data} />
@@ -125,7 +215,10 @@ export default function IpBlockReport() {
                 />
             </div>
 
-            <BlockedIpsTable blockedIps={reportState.data.blockedIps} />
+            <BlockedIpsTable
+                blockedIps={reportState.data.blockedIps}
+                onUnblock={handleUnblockIp}
+            />
         </div>
     );
 }
@@ -224,8 +317,8 @@ export const SuspiciousActivityTable = ({ activities }) => {
     );
 };
 
-// Blocked IPs Table Component
-export const BlockedIpsTable = ({ blockedIps }) => {
+// Enhanced Blocked IPs Table Component with unblock functionality
+export const BlockedIpsTable = ({ blockedIps, onUnblock }) => {
     return (
         <Card>
             <CardHeader>
@@ -242,6 +335,8 @@ export const BlockedIpsTable = ({ blockedIps }) => {
                             <TableHead>Country</TableHead>
                             <TableHead>Attempts</TableHead>
                             <TableHead>Last Access</TableHead>
+                            <TableHead>Reason</TableHead>
+                            <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -251,6 +346,21 @@ export const BlockedIpsTable = ({ blockedIps }) => {
                                 <TableCell>{ip.country}</TableCell>
                                 <TableCell>{ip.attempts}</TableCell>
                                 <TableCell>{ip.lastAccess}</TableCell>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                        {ip.reason || "Suspicious Activity"}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onUnblock(ip.ip)}>
+                                        <Unlock className="h-4 w-4 mr-2" />
+                                        Unblock
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

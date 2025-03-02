@@ -11,6 +11,7 @@ import {
     MousePointer,
     Globe,
     Lock,
+    Shield,
 } from "lucide-react";
 import {
     Card,
@@ -27,9 +28,19 @@ import {
     TableCell,
     TableHeader,
 } from "../../components/ui/table";
+import {
+    PieChart,
+    Pie,
+    Cell,
+    ResponsiveContainer,
+    Legend,
+    Tooltip,
+} from "recharts";
 import { useWebsite } from "../../contexts/websiteContext";
 import { format } from "date-fns";
 import { websiteService } from "../../services/websiteService";
+import { ipBlockService } from "../../services/ipBlockService";
+import { toast } from "react-toastify";
 
 const fadeIn = (delay = 0) => ({
     initial: { opacity: 0, y: 20 },
@@ -38,11 +49,46 @@ const fadeIn = (delay = 0) => ({
 });
 
 const STATS_CONFIG = [
-    { title: "Total Visits", key: "totalVisits", icon: Users },
-    { title: "Blocked Visits", key: "blockedVisits", icon: Lock },
-    { title: "Bot Traffic", key: "botTraffic", icon: Satellite },
-    { title: "Same IP Visits", key: "sameIpVisits", icon: MousePointerClick },
-    { title: "Suspicious Activity", key: "suspiciousActivity", icon: FileText },
+    {
+        title: "Total Visits",
+        key: "totalVisits",
+        icon: Users,
+        color: "bg-blue-100 text-blue-600",
+        bodyColor: "bg-blue-50",
+        trendColor: "text-blue-600",
+    },
+    {
+        title: "Blocked Visits",
+        key: "blockedVisits",
+        icon: Lock,
+        color: "bg-red-100 text-red-600",
+        bodyColor: "bg-red-50",
+        trendColor: "text-red-600",
+    },
+    {
+        title: "Bot Traffic",
+        key: "botTraffic",
+        icon: Satellite,
+        color: "bg-purple-100 text-purple-600",
+        bodyColor: "bg-purple-50",
+        trendColor: "text-purple-600",
+    },
+    {
+        title: "Same IP Visits",
+        key: "sameIpVisits",
+        icon: MousePointerClick,
+        color: "bg-amber-100 text-amber-600",
+        bodyColor: "bg-amber-50",
+        trendColor: "text-amber-600",
+    },
+    {
+        title: "Suspicious Activity",
+        key: "suspiciousActivity",
+        icon: FileText,
+        color: "bg-emerald-100 text-emerald-600",
+        bodyColor: "bg-emerald-50",
+        trendColor: "text-emerald-600",
+    },
 ];
 
 const Dashboard = () => {
@@ -56,8 +102,92 @@ const Dashboard = () => {
             sameIpVisits: 50,
             suspiciousActivity: 30,
         },
+        blockStats: {
+            total: 250,
+            byReason: [
+                { name: "Suspicious Activity", value: 120 },
+                { name: "Bot Traffic", value: 80 },
+                { name: "Manual Block", value: 50 },
+            ],
+            byCountry: [
+                { name: "United States", value: 85 },
+                { name: "China", value: 65 },
+                { name: "Russia", value: 45 },
+                { name: "India", value: 35 },
+                { name: "Others", value: 20 },
+            ],
+        },
         events: [
-            // Sample events data
+            {
+                id: "1",
+                data: {
+                    element: "BUTTON",
+                    href: "/api/admin",
+                    text: "Admin Access Attempt",
+                },
+                session: {
+                    country: "RU",
+                    deviceType: "desktop",
+                    browser: "Chrome",
+                },
+                createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
+            },
+            {
+                id: "2",
+                data: {
+                    element: "NAVIGATION",
+                    href: "/login",
+                    text: "Repeated Login Attempts",
+                },
+                session: {
+                    country: "CN",
+                    deviceType: "mobile",
+                    browser: "Safari",
+                },
+                createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
+            },
+            {
+                id: "3",
+                data: {
+                    element: "A",
+                    href: "/user/data",
+                    text: "Unauthorized Data Access",
+                },
+                session: {
+                    country: "US",
+                    deviceType: "desktop",
+                    browser: "Firefox",
+                },
+                createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+            },
+            {
+                id: "4",
+                data: {
+                    element: "BUTTON",
+                    href: "/settings",
+                    text: "Multiple Settings Changes",
+                },
+                session: {
+                    country: "IN",
+                    deviceType: "tablet",
+                    browser: "Edge",
+                },
+                createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 minutes ago
+            },
+            {
+                id: "5",
+                data: {
+                    element: "NAVIGATION",
+                    href: "/api/users",
+                    text: "API Scan Attempt",
+                },
+                session: {
+                    country: "BR",
+                    deviceType: "desktop",
+                    browser: "Chrome",
+                },
+                createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
+            },
         ],
         loading: false,
     });
@@ -70,14 +200,16 @@ const Dashboard = () => {
 
         const fetchData = async () => {
             try {
-                const [overview, events] = await Promise.all([
+                const [overview, events, blockStats] = await Promise.all([
                     websiteService.getOverviewData(selectedWebsite.id),
                     websiteService.getEventsData(selectedWebsite.id),
+                    ipBlockService.getBlockStats(selectedWebsite.id),
                 ]);
 
                 setDashboardData({
                     overview,
                     events,
+                    blockStats,
                     loading: false,
                 });
             } catch (error) {
@@ -117,24 +249,22 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {stats.map((stat, index) => (
                     <motion.div key={stat.title} {...fadeIn(index * 0.1)}>
-                        <Card className="hover:shadow-md transition-shadow">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <Card className="hover:shadow-lg transition-shadow border-none overflow-hidden">
+                            <CardHeader
+                                className={`flex flex-row items-center justify-between space-y-0 pb-2 ${stat.color}`}>
                                 <CardTitle className="text-sm font-medium">
                                     {stat.title}
                                 </CardTitle>
-                                <stat.icon className="h-5 w-5 text-primary" />
+                                <stat.icon className="h-5 w-5" />
                             </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">
+                            <CardContent className={`pt-4 ${stat.bodyColor}`}>
+                                <div
+                                    className={`text-3xl font-bold ${stat.trendColor}`}>
                                     {stat.value}
                                 </div>
                                 <div className="flex items-center gap-1 text-sm mt-2">
                                     <span
-                                        className={`${
-                                            stat.trend === "up"
-                                                ? "text-green-500"
-                                                : "text-red-500"
-                                        } flex items-center`}>
+                                        className={`${stat.trendColor} flex items-center font-medium`}>
                                         <RefreshCw className="h-4 w-4 mr-1" />
                                         {stat.metric}
                                     </span>
@@ -146,6 +276,115 @@ const Dashboard = () => {
                         </Card>
                     </motion.div>
                 ))}
+            </div>
+
+            {/* IP Block Status Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div {...fadeIn(0.3)}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                IP Block Distribution by Reason
+                            </CardTitle>
+                            <CardDescription>
+                                Distribution of blocked IPs categorized by
+                                blocking reason
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-[300px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={
+                                                dashboardData.blockStats
+                                                    .byReason
+                                            }
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={80}
+                                            fill="hsl(var(--primary))"
+                                            label>
+                                            {dashboardData.blockStats.byReason.map(
+                                                (entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={`hsl(${index * 40}, 70%, 50%)`}
+                                                    />
+                                                ),
+                                            )}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor:
+                                                    "hsl(var(--background))",
+                                                borderColor:
+                                                    "hsl(var(--border))",
+                                                borderRadius: "8px",
+                                            }}
+                                        />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                <motion.div {...fadeIn(0.4)}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                IP Block Distribution by Country
+                            </CardTitle>
+                            <CardDescription>
+                                Geographical distribution of blocked IP
+                                addresses
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-[300px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={
+                                                dashboardData.blockStats
+                                                    .byCountry
+                                            }
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={80}
+                                            fill="hsl(var(--primary))"
+                                            label>
+                                            {dashboardData.blockStats.byCountry.map(
+                                                (entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={`hsl(${index * 40}, 70%, 50%)`}
+                                                    />
+                                                ),
+                                            )}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor:
+                                                    "hsl(var(--background))",
+                                                borderColor:
+                                                    "hsl(var(--border))",
+                                                borderRadius: "8px",
+                                            }}
+                                        />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
             </div>
 
             <motion.div {...fadeIn(0.4)}>
