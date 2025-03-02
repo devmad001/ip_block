@@ -255,27 +255,30 @@ export const IpVisitsChart = ({ ipVisits }) => {
             </CardHeader>
             <CardContent>
                 {/* Add your chart here */}
-
-                <BarChart data={ipVisits}>
-                    <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted"
-                    />
-                    <XAxis dataKey="ip" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "hsl(var(--background))",
-                            borderColor: "hsl(var(--border))",
-                            borderRadius: "8px",
-                        }}
-                    />
-                    <Bar
-                        dataKey="visits"
-                        fill="hsl(var(--primary))"
-                        radius={[4, 4, 0, 0]}
-                    />
-                </BarChart>
+                <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={ipVisits}>
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                className="stroke-muted"
+                            />
+                            <XAxis dataKey="ip" stroke="#64748b" />
+                            <YAxis stroke="#64748b" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "hsl(var(--background))",
+                                    borderColor: "hsl(var(--border))",
+                                    borderRadius: "8px",
+                                }}
+                            />
+                            <Bar
+                                dataKey="visits"
+                                fill="hsl(var(--primary))"
+                                radius={[4, 4, 0, 0]}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </CardContent>
         </Card>
     );
