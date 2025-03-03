@@ -36,7 +36,7 @@ const Sidebar = () => {
             icon: Users,
             href: "/dashboard/sessions-details",
         },
-        { id: 4, title: "Events", icon: Mail, href: "/dashboard/events" },
+
         {
             id: 6,
             title: "Settings",
