@@ -53,6 +53,11 @@ export function PublicHeader() {
                                     Pricing
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
+                            <NavigationMenuItem>
+                                <Link to="/guide" className={navLinkClass}>
+                                    User Guide
+                                </Link>
+                            </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
 
@@ -88,6 +93,11 @@ export function PublicHeader() {
                                     to="/pricing"
                                     className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
                                     Pricing
+                                </Link>
+                                <Link
+                                    to="/guide"
+                                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                                    User Guide
                                 </Link>
 
                                 <div className="flex flex-col gap-2 pt-4">

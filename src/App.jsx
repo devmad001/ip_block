@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
+import UserGuide from "./pages/UserGuide";
 import LayoutWithSidebar from "./layouts/LayoutWithSidebar";
 import ProtectedRoute from "./middlewares/ProtectedRoute.jsx";
 import SignUp from "./pages/auth/Siginup";
@@ -59,6 +60,7 @@ const App = () => (
                                 }
                             />
                             <Route path="/about" element={<About />} />
+                            <Route path="/guide" element={<UserGuide />} />
                         </Route>
                         <Route
                             element={
