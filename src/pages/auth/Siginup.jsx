@@ -4,6 +4,7 @@ import { UserPlus } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import {
     Card,
     CardContent,
@@ -18,15 +19,14 @@ import { Link } from "react-router-dom";
 import api from "../../api/axios";
 
 const signUpSchema = z.object({
-    name: z.string().nonempty("Name is required"),
+    firstName: z.string().nonempty("First name is required"),
+    lastName: z.string().nonempty("Last name is required"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 8 characters"),
 });
 
 export default function SignUp() {
     const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
 
     const {
         register,
@@ -38,18 +38,35 @@ export default function SignUp() {
 
     const onSubmit = async (data) => {
         setLoading(true);
-        setErrorMessage("");
-        setSuccessMessage("");
 
         try {
-            const response = await api.post("/api/v1/users/signup", data);
-            console.log(response.data);
-            setSuccessMessage(
-                "Account created successfully! You can now sign in.",
+            const requestData = {
+                name: `${data.firstName} ${data.lastName}`,
+                email: data.email,
+                password: data.password,
+            };
+            const response = await api.post(
+                "/api/v1/users/signup",
+                requestData,
             );
+            console.log(response.data);
+            toast.success("Account created successfully! You can now sign in.");
+            // You might want to redirect to login page here
         } catch (error) {
-            setErrorMessage("Failed to create account");
-            setErrorMessage(error.message);
+            // Handle different types of errors
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                const errorMessage =
+                    error.response.data.error || "Failed to create account";
+                toast.error(errorMessage);
+            } else if (error.request) {
+                // The request was made but no response was received
+                toast.error("No response from server. Please try again later.");
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                toast.error("An error occurred. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -75,18 +92,35 @@ export default function SignUp() {
                         <form
                             onSubmit={handleSubmit(onSubmit)}
                             className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="John Doe"
-                                    {...register("name")}
-                                />
-                                {errors.name && (
-                                    <p className="text-red-600 text-sm">
-                                        {errors.name.message}
-                                    </p>
-                                )}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="firstName">
+                                        First name
+                                    </Label>
+                                    <Input
+                                        id="firstName"
+                                        placeholder="John"
+                                        {...register("firstName")}
+                                    />
+                                    {errors.firstName && (
+                                        <p className="text-red-600 text-sm">
+                                            {errors.firstName.message}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastName">Last name</Label>
+                                    <Input
+                                        id="lastName"
+                                        placeholder="Doe"
+                                        {...register("lastName")}
+                                    />
+                                    {errors.lastName && (
+                                        <p className="text-red-600 text-sm">
+                                            {errors.lastName.message}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
@@ -120,16 +154,6 @@ export default function SignUp() {
                                 {loading ? "Creating..." : "Create Account"}
                                 <UserPlus className="w-4 h-4 ml-2" />
                             </Button>
-                            {errorMessage && (
-                                <p className="text-red-600 text-sm text-center">
-                                    {errorMessage}
-                                </p>
-                            )}
-                            {successMessage && (
-                                <p className="text-green-600 text-sm text-center">
-                                    {successMessage}
-                                </p>
-                            )}
                             <p className="text-center text-sm text-gray-600">
                                 Already have an account?{" "}
                                 <Link

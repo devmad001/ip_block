@@ -21,25 +21,36 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        console.log("Setting up auth state listener");
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            console.log(
-                "Auth state changed:",
-                user ? "User logged in" : "User logged out",
-            );
-            setUser(user);
-            setLoading(false);
-        });
+    const login = async (email, password) => {
+        try {
+            const { data } = await api.post("/api/v1/users/login", {
+                email,
+                password,
+            });
 
-        return unsubscribe;
-    }, []);
+            if (data.token && data.user) {
+                // Store the JWT token and user data
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                setUser(data.user);
+                return data.user;
+            } else {
+                throw new Error("Invalid response from server");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            if (error.response) {
+                throw new Error(error.response.data.error || "Login failed");
+            }
+            throw error;
+        }
+    };
 
     const signInWithGoogle = async () => {
-        console.log("Starting Google sign-in process");
         const provider = new GoogleAuthProvider();
+
         try {
             console.log("Opening Google sign-in popup");
             const result = await signInWithPopup(auth, provider);
@@ -47,27 +58,36 @@ export function AuthProvider({ children }) {
             const idToken = await result.user.getIdToken();
 
             console.log("Sending token to backend");
-            // Send the token to the backend
-            const { data } = await api.post(
-                "/api/v1/auth/google",
-                { idToken },
-                {
-                    headers: {
-                        Authorization: `Bearer ${idToken}`,
-                    },
-                },
-            );
+            // const { data } = await api.post(
+            //     "/api/v1/auth/google",
+            //     { idToken },
+            //     {
+            //         headers: {
+            //             Authorization: `Bearer ${idToken}`,
+            //         },
+            //     },
+            // );
 
-            console.log("Backend response received:", data);
-            // Store the JWT token from our backend
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
+            // console.log("Backend response received:", data);
+            // // Store the JWT token from our backend
+            // localStorage.setItem("token", data.token);
+            // localStorage.setItem("user", JSON.stringify(data.user));
 
-            toast.success("Successfully signed in!");
-            return data.user;
+            // // Set the user state
+
+            // toast.success("Successfully signed in!");
+            // return data.user;
         } catch (error) {
-            console.error("Error in signInWithGoogle:", error);
-            toast.error(error.message || "Failed to sign in with Google");
+            console.error("Google sign-in error:", error);
+            if (error.code === "popup-closed-by-user") {
+                toast.error("Sign-in was cancelled");
+            } else if (error.code === "popup-blocked") {
+                toast.error(
+                    "Pop-up was blocked by your browser. Please allow pop-ups for this site.",
+                );
+            } else {
+                toast.error("Failed to sign in with Google");
+            }
             throw error;
         }
     };
@@ -76,21 +96,25 @@ export function AuthProvider({ children }) {
         console.log("Starting logout process");
         try {
             await signOut(auth);
+            // Clear all auth-related data
             localStorage.removeItem("token");
             localStorage.removeItem("user");
-            toast.success("Successfully signed out!");
+            // Reset user state
+
+            toast.success("Successfully logged out!");
         } catch (error) {
-            console.error("Error in logout:", error);
-            toast.error(error.message || "Failed to sign out");
+            console.error("Logout error:", error);
+            toast.error("Failed to log out");
             throw error;
         }
     };
 
     const value = {
         user,
+        loading,
+        login,
         signInWithGoogle,
         logout,
-        loading,
         isAuthenticated: !!user,
     };
 
