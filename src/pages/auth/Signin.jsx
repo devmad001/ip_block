@@ -13,9 +13,10 @@ import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useAuth } from "../../contexts/authContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { GoogleSignInButton } from "../../components/GoogleSignInButton";
 
 const signInSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -134,10 +135,7 @@ export default function SignIn() {
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
-                                <Button variant="outline">
-                                    <Mail className="w-4 h-4 mr-2" />
-                                    Google
-                                </Button>
+                                <GoogleSignInButton />
                             </div>
                         </form>
                     </CardContent>

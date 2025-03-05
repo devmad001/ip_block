@@ -18,8 +18,7 @@ import { Link } from "react-router-dom";
 import api from "../../api/axios";
 
 const signUpSchema = z.object({
-    firstName: z.string().nonempty("First name is required"),
-    lastName: z.string().nonempty("Last name is required"),
+    name: z.string().nonempty("Name is required"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 8 characters"),
 });
@@ -43,7 +42,7 @@ export default function SignUp() {
         setSuccessMessage("");
 
         try {
-            const response = await api.post("/api/v1/users/register", data);
+            const response = await api.post("/api/v1/users/signup", data);
             console.log(response.data);
             setSuccessMessage(
                 "Account created successfully! You can now sign in.",
@@ -76,35 +75,18 @@ export default function SignUp() {
                         <form
                             onSubmit={handleSubmit(onSubmit)}
                             className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="firstName">
-                                        First name
-                                    </Label>
-                                    <Input
-                                        id="firstName"
-                                        placeholder="John"
-                                        {...register("firstName")}
-                                    />
-                                    {errors.firstName && (
-                                        <p className="text-red-600 text-sm">
-                                            {errors.firstName.message}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="lastName">Last name</Label>
-                                    <Input
-                                        id="lastName"
-                                        placeholder="Doe"
-                                        {...register("lastName")}
-                                    />
-                                    {errors.lastName && (
-                                        <p className="text-red-600 text-sm">
-                                            {errors.lastName.message}
-                                        </p>
-                                    )}
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    placeholder="John Doe"
+                                    {...register("name")}
+                                />
+                                {errors.name && (
+                                    <p className="text-red-600 text-sm">
+                                        {errors.name.message}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>

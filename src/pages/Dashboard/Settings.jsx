@@ -112,15 +112,9 @@ export default function Settings() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>First Name</Label>
-                                    <Input defaultValue="John" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Last Name</Label>
-                                    <Input defaultValue="Doe" />
-                                </div>
+                            <div className="space-y-2">
+                                <Label>Name</Label>
+                                <Input defaultValue="John Doe" />
                             </div>
 
                             <div className="space-y-2">

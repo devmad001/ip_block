@@ -47,7 +47,17 @@ export const authService = {
     signInWithGoogle: async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
-            return result.user;
+            const idToken = await result.user.getIdToken();
+
+            // Send the token to our backend
+            const response = await api.post('/api/v1/auth/google', { idToken });
+            const { token, user } = response.data;
+
+            // Store the JWT token from our backend
+            authService.storeToken(token);
+            authService.setAuthHeader(token);
+
+            return user;
         } catch (error) {
             console.error('Error signing in with Google:', error);
             throw error;

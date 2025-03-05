@@ -10,7 +10,7 @@ import SignIn from "./pages/auth/Signin";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LayoutWithPublicHeader from "./layouts/LayoutWithPublicHeader";
-import { AuthProvider } from "./contexts/authContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import UnProtectedRoute from "./middlewares/UnprotectedRoute";
 import { WebsiteProvider } from "./contexts/websiteContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // for data fetching
