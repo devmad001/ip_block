@@ -12,10 +12,9 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { z } from "zod";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
 import { GoogleSignInButton } from "../../components/GoogleSignInButton";
 
 const signInSchema = z.object({
@@ -37,6 +36,7 @@ export default function SignIn() {
     };
 
     const handleSubmit = async (e) => {
+        alert("asdf");
         e.preventDefault();
         setIsLoading(true);
 
@@ -47,20 +47,15 @@ export default function SignIn() {
                 email: fieldErrors.email?.[0] || "",
                 password: fieldErrors.password?.[0] || "",
             });
+            setIsLoading(false);
             return;
         }
 
         try {
-            const { data } = await api.post("/api/v1/users/login", formData);
-            if (data.token && data.user) {
-                login(data);
-                toast.success("Sign in successful!");
-                navigate("/dashboard");
-            } else {
-                throw new Error("Invalid response from server");
-            }
+            await login(formData.email, formData.password);
+            toast.success("Sign in successful!");
+            navigate("/dashboard");
         } catch (error) {
-            console.error(error.message);
             toast.error(error.message || "An error occurred during sign-in.");
         } finally {
             setIsLoading(false);
@@ -84,7 +79,7 @@ export default function SignIn() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -121,7 +116,7 @@ export default function SignIn() {
                                 disabled={isLoading}
                                 className="w-full"
                                 type="submit">
-                                Sign In
+                                {isLoading ? "Signing in..." : "Sign In"}
                                 <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                             <div className="relative">
