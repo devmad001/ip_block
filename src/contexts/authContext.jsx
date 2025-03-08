@@ -58,25 +58,25 @@ export function AuthProvider({ children }) {
             const idToken = await result.user.getIdToken();
 
             console.log("Sending token to backend");
-            // const { data } = await api.post(
-            //     "/api/v1/auth/google",
-            //     { idToken },
-            //     {
-            //         headers: {
-            //             Authorization: `Bearer ${idToken}`,
-            //         },
-            //     },
-            // );
+            const { data } = await api.post(
+                "/api/v1/users/google",
+                { idToken },
+                {
+                    headers: {
+                        Authorization: `Bearer ${idToken}`,
+                    },
+                },
+            );
 
-            // console.log("Backend response received:", data);
-            // // Store the JWT token from our backend
-            // localStorage.setItem("token", data.token);
-            // localStorage.setItem("user", JSON.stringify(data.user));
+            console.log("Backend response received:", data);
+            // Store the JWT token from our backend
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            setUser(data.user);
+            // Set the user state
 
-            // // Set the user state
-
-            // toast.success("Successfully signed in!");
-            // return data.user;
+            toast.success("Successfully signed in!");
+            return data.user;
         } catch (error) {
             console.error("Google sign-in error:", error);
             if (error.code === "popup-closed-by-user") {
@@ -100,7 +100,7 @@ export function AuthProvider({ children }) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             // Reset user state
-
+            setUser(null);
             toast.success("Successfully logged out!");
         } catch (error) {
             console.error("Logout error:", error);

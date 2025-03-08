@@ -41,6 +41,7 @@ import { format } from "date-fns";
 import { websiteService } from "../../services/websiteService";
 import { ipBlockService } from "../../services/ipBlockService";
 import { toast } from "react-toastify";
+import IpBlockCharts from "./components/IpBlockCharts";
 
 const fadeIn = (delay = 0) => ({
     initial: { opacity: 0, y: 20 },
@@ -192,6 +193,14 @@ const Dashboard = () => {
         loading: false,
     });
 
+    const [animatedStats, setAnimatedStats] = useState({
+        totalVisits: 0,
+        blockedVisits: 0,
+        botTraffic: 0,
+        sameIpVisits: 0,
+        suspiciousActivity: 0,
+    });
+
     useEffect(() => {
         if (!selectedWebsite?.id) return;
 
@@ -225,19 +234,67 @@ const Dashboard = () => {
         return () => controller.abort();
     }, [selectedWebsite?.id]);
 
+    useEffect(() => {
+        const duration = 2000; // 2 seconds
+        const interval = 50; // update every 50ms
+        const steps = duration / interval;
+
+        const increment = {
+            totalVisits: dashboardData.overview.totalVisits / steps,
+            blockedVisits: dashboardData.overview.blockedVisits / steps,
+            botTraffic: dashboardData.overview.botTraffic / steps,
+            sameIpVisits: dashboardData.overview.sameIpVisits / steps,
+            suspiciousActivity:
+                dashboardData.overview.suspiciousActivity / steps,
+        };
+
+        let currentStep = 0;
+        const timer = setInterval(() => {
+            if (currentStep < steps) {
+                setAnimatedStats((prev) => ({
+                    totalVisits: Math.min(
+                        prev.totalVisits + increment.totalVisits,
+                        dashboardData.overview.totalVisits,
+                    ),
+                    blockedVisits: Math.min(
+                        prev.blockedVisits + increment.blockedVisits,
+                        dashboardData.overview.blockedVisits,
+                    ),
+                    botTraffic: Math.min(
+                        prev.botTraffic + increment.botTraffic,
+                        dashboardData.overview.botTraffic,
+                    ),
+                    sameIpVisits: Math.min(
+                        prev.sameIpVisits + increment.sameIpVisits,
+                        dashboardData.overview.sameIpVisits,
+                    ),
+                    suspiciousActivity: Math.min(
+                        prev.suspiciousActivity + increment.suspiciousActivity,
+                        dashboardData.overview.suspiciousActivity,
+                    ),
+                }));
+                currentStep++;
+            } else {
+                clearInterval(timer);
+            }
+        }, interval);
+
+        return () => clearInterval(timer);
+    }, [dashboardData.overview]);
+
     const stats = useMemo(
         () =>
             STATS_CONFIG.map((config) => ({
                 ...config,
-                value: dashboardData.overview?.[config.key] ?? "-",
+                value: Math.round(animatedStats[config.key]) ?? "-",
                 metric: "2.4% ↑",
                 trend: "up",
             })),
-        [dashboardData.overview],
+        [animatedStats],
     );
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-gradient-to-br from-blue-100 via-blue-200 to-green-200">
             <div>
                 <h1 className="text-2xl font-bold">IP Block Dashboard</h1>
                 <p className="text-muted-foreground">
@@ -246,7 +303,7 @@ const Dashboard = () => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 {stats.map((stat, index) => (
                     <motion.div key={stat.title} {...fadeIn(index * 0.1)}>
                         <Card className="hover:shadow-lg transition-shadow border-none overflow-hidden">
@@ -257,7 +314,8 @@ const Dashboard = () => {
                                 </CardTitle>
                                 <stat.icon className="h-5 w-5" />
                             </CardHeader>
-                            <CardContent className={`pt-4 ${stat.bodyColor}`}>
+                            <CardContent
+                                className={`pt-4 ${stat.bodyColor} bg-gradient-to-br from-white to-blue-100`}>
                                 <div
                                     className={`text-3xl font-bold ${stat.trendColor}`}>
                                     {stat.value}
@@ -277,7 +335,7 @@ const Dashboard = () => {
                     </motion.div>
                 ))}
             </div>
-
+            <IpBlockCharts />
             {/* IP Block Status Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <motion.div {...fadeIn(0.3)}>
@@ -291,10 +349,28 @@ const Dashboard = () => {
                                 blocking reason
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="bg-gradient-to-br from-white to-blue-100">
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
+                                        <defs>
+                                            {dashboardData.blockStats.byReason.map(
+                                                (entry, index) => (
+                                                    <linearGradient
+                                                        key={`gradient-${index}`}
+                                                        id={`colorGradient-${index}`}>
+                                                        <stop
+                                                            offset="0%"
+                                                            stopColor={`hsl(${index * 40}, 85%, 60%)`}
+                                                        />
+                                                        <stop
+                                                            offset="100%"
+                                                            stopColor={`hsl(${index * 40}, 70%, 45%)`}
+                                                        />
+                                                    </linearGradient>
+                                                ),
+                                            )}
+                                        </defs>
                                         <Pie
                                             data={
                                                 dashboardData.blockStats
@@ -304,14 +380,20 @@ const Dashboard = () => {
                                             nameKey="name"
                                             cx="50%"
                                             cy="50%"
+                                            innerRadius={40}
                                             outerRadius={80}
+                                            paddingAngle={3}
+                                            startAngle={90}
+                                            endAngle={-270}
                                             fill="hsl(var(--primary))"
                                             label>
                                             {dashboardData.blockStats.byReason.map(
                                                 (entry, index) => (
                                                     <Cell
                                                         key={`cell-${index}`}
-                                                        fill={`hsl(${index * 40}, 70%, 50%)`}
+                                                        fill={`url(#colorGradient-${index})`}
+                                                        stroke="hsl(var(--background))"
+                                                        strokeWidth={1}
                                                     />
                                                 ),
                                             )}
@@ -344,10 +426,28 @@ const Dashboard = () => {
                                 addresses
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="bg-gradient-to-br from-white to-blue-100">
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
+                                        <defs>
+                                            {dashboardData.blockStats.byCountry.map(
+                                                (entry, index) => (
+                                                    <linearGradient
+                                                        key={`gradient-country-${index}`}
+                                                        id={`colorGradientCountry-${index}`}>
+                                                        <stop
+                                                            offset="0%"
+                                                            stopColor={`hsl(${index * 40}, 85%, 60%)`}
+                                                        />
+                                                        <stop
+                                                            offset="100%"
+                                                            stopColor={`hsl(${index * 40}, 70%, 45%)`}
+                                                        />
+                                                    </linearGradient>
+                                                ),
+                                            )}
+                                        </defs>
                                         <Pie
                                             data={
                                                 dashboardData.blockStats
@@ -357,14 +457,20 @@ const Dashboard = () => {
                                             nameKey="name"
                                             cx="50%"
                                             cy="50%"
+                                            innerRadius={40}
                                             outerRadius={80}
+                                            paddingAngle={3}
+                                            startAngle={90}
+                                            endAngle={-270}
                                             fill="hsl(var(--primary))"
                                             label>
                                             {dashboardData.blockStats.byCountry.map(
                                                 (entry, index) => (
                                                     <Cell
                                                         key={`cell-${index}`}
-                                                        fill={`hsl(${index * 40}, 70%, 50%)`}
+                                                        fill={`url(#colorGradientCountry-${index})`}
+                                                        stroke="hsl(var(--background))"
+                                                        strokeWidth={1}
                                                     />
                                                 ),
                                             )}

@@ -38,7 +38,6 @@ export default function SignIn() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
 
         const validation = signInSchema.safeParse(formData);
         if (!validation.success) {
@@ -49,16 +48,11 @@ export default function SignIn() {
             });
             return;
         }
-
+        setIsLoading(true);
         try {
-            const { data } = await api.post("/api/v1/users/login", formData);
-            if (data.token && data.user) {
-                login(data);
-                toast.success("Sign in successful!");
-                navigate("/dashboard");
-            } else {
-                throw new Error("Invalid response from server");
-            }
+            await login(formData.email, formData.password);
+            toast.success("Sign in successful!");
+            navigate("/dashboard");
         } catch (error) {
             console.error(error.message);
             toast.error(error.message || "An error occurred during sign-in.");
@@ -84,7 +78,7 @@ export default function SignIn() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -120,8 +114,9 @@ export default function SignIn() {
                             <Button
                                 disabled={isLoading}
                                 className="w-full"
-                                type="submit">
-                                Sign In
+                                onClick={handleSubmit}>
+                                Sign In{" "}
+                                {isLoading ? "Signing in..." : "Sign In"}
                                 <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                             <div className="relative">
@@ -137,7 +132,7 @@ export default function SignIn() {
                             <div className="grid grid-cols-1 gap-4">
                                 <GoogleSignInButton />
                             </div>
-                        </form>
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>
