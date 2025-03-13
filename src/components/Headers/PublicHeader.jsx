@@ -21,6 +21,11 @@ export function PublicHeader() {
             <div className="max-w-7xl mx-auto flex h-14 items-center">
                 <div className=" hidden md:flex">
                     <Link to="/" className="mr-4 flex items-center space-x-2">
+                        <img
+                            src="/img/miniripple-01.png"
+                            alt="MiniRipple Logo"
+                            className="h-8 w-8"
+                        />
                         <span className="hidden font-bold sm:inline-block">
                             MiniRipple
                         </span>
