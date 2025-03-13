@@ -10,7 +10,7 @@ import {
 import { Button } from "../../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { LogOut, User } from "lucide-react";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 
 export function UserProfileDropdown() {

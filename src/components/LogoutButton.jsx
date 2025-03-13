@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 
 export function LogoutButton() {

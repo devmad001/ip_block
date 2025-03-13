@@ -1,4 +1,4 @@
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/authContext";
 import { FcGoogle } from "react-icons/fc";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
