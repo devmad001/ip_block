@@ -13,7 +13,7 @@ import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { GoogleSignInButton } from "../../components/GoogleSignInButton";
