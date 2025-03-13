@@ -48,7 +48,7 @@ const Sidebar = () => {
     return (
         <aside
             className={cn(
-                "h-screen relative bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
+                "h-screen relative bg-blue border-r border-gray-200 transition-all duration-300 ease-in-out",
                 expanded ? "w-64" : "w-20",
             )}>
             <Button

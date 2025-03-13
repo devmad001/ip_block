@@ -33,6 +33,25 @@ import { Input } from "../../components/ui/input";
 import { Plus, Ban, Unlock, AlertTriangle } from "lucide-react";
 import { ipBlockService } from "../../services/ipBlockService";
 import { toast } from "react-toastify";
+import { Bar as ChartBar } from "react-chartjs-2";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip as ChartTooltip,
+    Legend,
+} from "chart.js";
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    ChartTooltip,
+    Legend,
+);
 
 const ipVisitsData = [
     { ip: "192.168.1.1", visits: 300 },
@@ -245,6 +264,39 @@ export const KeyMetrics = ({ metrics }) => {
 
 // IP Visits Chart Component
 export const IpVisitsChart = ({ ipVisits }) => {
+    const data = {
+        labels: ipVisits.map((item) => item.ip),
+        datasets: [
+            {
+                label: "Visits",
+                data: ipVisits.map((item) => item.visits),
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: "top",
+            },
+            title: {
+                display: true,
+                text: "IP Visits Overview",
+            },
+        },
+        scales: {
+            z: {
+                type: "linear",
+                display: true,
+                position: "right",
+            },
+        },
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -254,30 +306,8 @@ export const IpVisitsChart = ({ ipVisits }) => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {/* Add your chart here */}
                 <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={ipVisits}>
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                className="stroke-muted"
-                            />
-                            <XAxis dataKey="ip" stroke="#64748b" />
-                            <YAxis stroke="#64748b" />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: "hsl(var(--background))",
-                                    borderColor: "hsl(var(--border))",
-                                    borderRadius: "8px",
-                                }}
-                            />
-                            <Bar
-                                dataKey="visits"
-                                fill="hsl(var(--primary))"
-                                radius={[4, 4, 0, 0]}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <ChartBar data={data} options={options} />
                 </div>
             </CardContent>
         </Card>

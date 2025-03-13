@@ -386,7 +386,10 @@ const Dashboard = () => {
                                             startAngle={90}
                                             endAngle={-270}
                                             fill="hsl(var(--primary))"
-                                            label>
+                                            label
+                                            style={{
+                                                filter: "drop-shadow(2px 4px 6px rgba(0,0,0,0.3))",
+                                            }}>
                                             {dashboardData.blockStats.byReason.map(
                                                 (entry, index) => (
                                                     <Cell
@@ -463,7 +466,10 @@ const Dashboard = () => {
                                             startAngle={90}
                                             endAngle={-270}
                                             fill="hsl(var(--primary))"
-                                            label>
+                                            label
+                                            style={{
+                                                filter: "drop-shadow(2px 4px 6px rgba(0,0,0,0.3))",
+                                            }}>
                                             {dashboardData.blockStats.byCountry.map(
                                                 (entry, index) => (
                                                     <Cell

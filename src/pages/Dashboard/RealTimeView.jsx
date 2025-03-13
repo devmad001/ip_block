@@ -28,6 +28,8 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
+    RadialBarChart,
+    RadialBar,
 } from "recharts";
 
 const initialData = [
@@ -196,13 +198,22 @@ export default function RealTimePage() {
                         </CardHeader>
                         <CardContent className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData}>
-                                    <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        className="stroke-muted"
+                                <RadialBarChart
+                                    innerRadius="10%"
+                                    outerRadius="80%"
+                                    data={chartData}
+                                    startAngle={180}
+                                    endAngle={0}>
+                                    <RadialBar
+                                        minAngle={15}
+                                        label={{
+                                            position: "insideStart",
+                                            fill: "#fff",
+                                        }}
+                                        background
+                                        clockWise={true}
+                                        dataKey="count"
                                     />
-                                    <XAxis dataKey="name" stroke="#64748b" />
-                                    <YAxis stroke="#64748b" />
                                     <Tooltip
                                         contentStyle={{
                                             backgroundColor:
@@ -211,12 +222,7 @@ export default function RealTimePage() {
                                             borderRadius: "8px",
                                         }}
                                     />
-                                    <Bar
-                                        dataKey="count"
-                                        fill="hsl(var(--primary))"
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                </BarChart>
+                                </RadialBarChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
