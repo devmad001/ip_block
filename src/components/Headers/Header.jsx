@@ -4,7 +4,7 @@ import { UserProfileDropdown } from "./components/UserProfileDropdown";
 
 const Header = () => {
     return (
-        <header className="h-16 border-b border-gray-200 bg-white px-4 flex items-center justify-between">
+        <header className="h-16 border-b border-gray-200 bg-[rgb(1,20,49)] text-white px-4 flex items-center justify-between">
             <div className="ml-5 hidden md:block">
                 <WebsiteSwitcher />
             </div>

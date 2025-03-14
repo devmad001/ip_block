@@ -295,10 +295,12 @@ const Dashboard = () => {
     );
 
     return (
-        <div className="p-6 space-y-6 bg-gradient-to-br from-blue-100 via-blue-200 to-green-200">
+        <div className="p-6 space-y-6 bg-gradient-to-br from-[rgb(1,20,49)] via-[rgb(72,144,239)] to-[rgb(251,208,32)]">
             <div>
-                <h1 className="text-2xl font-bold">IP Block Dashboard</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl font-bold text-white">
+                    IP Block Dashboard
+                </h1>
+                <p className="text-white/80">
                     Monitor and analyze suspicious and malicious traffic on your
                     website.
                 </p>
@@ -307,7 +309,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 {stats.map((stat, index) => (
                     <motion.div key={stat.title} {...fadeIn(index * 0.1)}>
-                        <Card className="hover:shadow-lg transition-shadow border-none overflow-hidden">
+                        <Card className="hover:shadow-lg transition-shadow border-none overflow-hidden bg-white/90 backdrop-blur-sm">
                             <CardHeader
                                 className={`flex flex-row items-center justify-between space-y-0 pb-2 ${stat.color}`}>
                                 <CardTitle className="text-sm font-medium">
@@ -316,7 +318,7 @@ const Dashboard = () => {
                                 <stat.icon className="h-5 w-5" />
                             </CardHeader>
                             <CardContent
-                                className={`pt-4 ${stat.bodyColor} bg-gradient-to-br from-white to-blue-100`}>
+                                className={`pt-4 bg-gradient-to-br from-white/80 to-[rgb(72,144,239)]/10`}>
                                 <div
                                     className={`text-3xl font-bold ${stat.trendColor}`}>
                                     {stat.value}

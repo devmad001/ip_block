@@ -16,7 +16,7 @@ import { Footer } from "../components/Layout/Footer";
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen max-w-7xl mx-auto bg-gradient-to-b from-background to-muted/20">
+        <div className="min-h-screen mx-0 bg-gradient-to-b from-[rgb(1,20,49)] via-[rgb(72,144,239)]/20 to-white max-w-screen">
             <HeroSection />
             <FeaturesSection />
             <PricingSection />
@@ -210,15 +210,15 @@ function FeaturesSection() {
 function HeroSection() {
     return (
         <header className="px-4 py-16 text-center">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-white">
                 Powerful Analytics for Your
-                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[rgb(251,208,32)] to-[rgb(72,144,239)] bg-clip-text text-transparent">
                     {" "}
                     Website
                 </span>
             </h1>
 
-            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
                 Gain deep insights into user behavior with our privacy-focused
                 analytics platform. Real-time tracking, custom events, and
                 intuitive dashboards.
@@ -226,13 +226,18 @@ function HeroSection() {
 
             <div className="flex gap-4 justify-center">
                 <Link to={"/login"}>
-                    <Button size="lg" className="gap-2">
+                    <Button
+                        size="lg"
+                        className="gap-2 bg-[rgb(72,144,239)] hover:bg-[rgb(72,144,239)]/90">
                         <RocketIcon className="h-4 w-4" />
                         Get Started Free
                     </Button>
                 </Link>
                 <Link to={"/dashboard"}>
-                    <Button size="lg" variant="outline">
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-black border-white hover:bg-white hover:text-black transition-colors">
                         View Demo
                     </Button>
                 </Link>
