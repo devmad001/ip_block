@@ -4,12 +4,12 @@ import Header from "../components/Headers/Header";
 import Sidebar from "../components/Layout/Sidebar";
 
 const LayoutWithSidebar = () => (
-    <div className="h-screen">
+    <div className="h-screen bg-[rgb(1,20,49)]">
         <div className="flex h-full">
             <Sidebar />
             <div className="flex-1 h-full overflow-y-scroll max-h-full">
                 <Header />
-                <main className=" p-0">
+                <main className="p-0">
                     <Outlet />
                 </main>
             </div>

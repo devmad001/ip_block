@@ -67,10 +67,10 @@ const Sidebar = () => {
                 )}
             </Button>
 
-            <div className="p-4 h-16 flex items-center border-b border-gray-200">
+            <div className="p-4 h-16 text-white flex items-center border-b border-gray-200">
                 <span
                     className={cn(
-                        "ml-3 font-semibold text-gray-900 transition-opacity duration-200",
+                        "text-white ml-3 font-semibold   transition-opacity duration-200",
                         expanded ? "block" : "hidden",
                     )}>
                     Dashboard
@@ -101,11 +101,11 @@ const Sidebar = () => {
                             />
                             <span
                                 className={cn(
-                                    "ml-3 group-hover:text-blue-600 whitespace-nowrap transition-opacity duration-200",
+                                    "text-white ml-3 group-hover:text-blue-600 whitespace-nowrap transition-opacity duration-200",
                                     expanded ? "opacity-100" : "opacity-0 w-0",
                                     location.pathname === item.href
                                         ? "text-blue-600"
-                                        : "text-gray-700",
+                                        : "text-white",
                                 )}>
                                 {item.title}
                             </span>

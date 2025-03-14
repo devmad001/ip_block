@@ -17,18 +17,15 @@ export function PublicHeader() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-7xl mx-auto flex h-14 items-center">
+        <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className=" mx-auto flex h-20 items-center">
                 <div className=" hidden md:flex">
                     <Link to="/" className="mr-4 flex items-center space-x-2">
                         <img
                             src="/miniripple-01.png"
                             alt="MiniRipple Logo"
-                            className="h-8 w-8"
+                            className="h-20 w-40"
                         />
-                        <span className="hidden font-bold sm:inline-block">
-                            MiniRipple
-                        </span>
                     </Link>
                 </div>
 
