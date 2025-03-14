@@ -22,7 +22,7 @@ export function PublicHeader() {
                 <div className=" hidden md:flex">
                     <Link to="/" className="mr-4 flex items-center space-x-2">
                         <img
-                            src="/img/miniripple-01.png"
+                            src="/miniripple-01.png"
                             alt="MiniRipple Logo"
                             className="h-8 w-8"
                         />

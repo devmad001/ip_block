@@ -42,6 +42,7 @@ import { websiteService } from "../../services/websiteService";
 import { ipBlockService } from "../../services/ipBlockService";
 import { toast } from "react-toastify";
 import IpBlockCharts from "./components/IpBlockCharts";
+import { BlockIPForm } from "../../components/BlockIPForm";
 
 const fadeIn = (delay = 0) => ({
     initial: { opacity: 0, y: 20 },
@@ -336,88 +337,10 @@ const Dashboard = () => {
                 ))}
             </div>
             <IpBlockCharts />
-            {/* IP Block Status Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <motion.div {...fadeIn(0.3)}>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                IP Block Distribution by Reason
-                            </CardTitle>
-                            <CardDescription>
-                                Distribution of blocked IPs categorized by
-                                blocking reason
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="bg-gradient-to-br from-white to-blue-100">
-                            <div className="h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <defs>
-                                            {dashboardData.blockStats.byReason.map(
-                                                (entry, index) => (
-                                                    <linearGradient
-                                                        key={`gradient-${index}`}
-                                                        id={`colorGradient-${index}`}>
-                                                        <stop
-                                                            offset="0%"
-                                                            stopColor={`hsl(${index * 40}, 85%, 60%)`}
-                                                        />
-                                                        <stop
-                                                            offset="100%"
-                                                            stopColor={`hsl(${index * 40}, 70%, 45%)`}
-                                                        />
-                                                    </linearGradient>
-                                                ),
-                                            )}
-                                        </defs>
-                                        <Pie
-                                            data={
-                                                dashboardData.blockStats
-                                                    .byReason
-                                            }
-                                            dataKey="value"
-                                            nameKey="name"
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={40}
-                                            outerRadius={80}
-                                            paddingAngle={3}
-                                            startAngle={90}
-                                            endAngle={-270}
-                                            fill="hsl(var(--primary))"
-                                            label
-                                            style={{
-                                                filter: "drop-shadow(2px 4px 6px rgba(0,0,0,0.3))",
-                                            }}>
-                                            {dashboardData.blockStats.byReason.map(
-                                                (entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={`url(#colorGradient-${index})`}
-                                                        stroke="hsl(var(--background))"
-                                                        strokeWidth={1}
-                                                    />
-                                                ),
-                                            )}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor:
-                                                    "hsl(var(--background))",
-                                                borderColor:
-                                                    "hsl(var(--border))",
-                                                borderRadius: "8px",
-                                            }}
-                                        />
-                                        <Legend />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <BlockIPForm />
                 </motion.div>
-
                 <motion.div {...fadeIn(0.4)}>
                     <Card>
                         <CardHeader>

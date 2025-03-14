@@ -7,6 +7,7 @@ import {
     Settings,
     Users,
     Mail,
+    Shield,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
@@ -31,12 +32,17 @@ const Sidebar = () => {
             href: "/dashboard/real-time-analytics",
         },
         {
-            id: 7,
+            id: 4,
+            title: "IP Block Management",
+            icon: Shield,
+            href: "/dashboard/ip-block",
+        },
+        {
+            id: 5,
             title: "Sessions",
             icon: Users,
             href: "/dashboard/sessions-details",
         },
-
         {
             id: 6,
             title: "Settings",

@@ -21,6 +21,7 @@ import SessionList from "./pages/Dashboard/SessionList";
 import SessionDetails from "./pages/Dashboard/SessionDetails";
 import Settings from "./pages/Dashboard/Settings";
 import EventsPage from "./pages/Dashboard/Events";
+import IPBlockManagement from "./pages/IPBlockManagement";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -92,6 +93,10 @@ const App = () => (
                             <Route
                                 path="/dashboard/events"
                                 element={<EventsPage />}
+                            />
+                            <Route
+                                path="/dashboard/ip-block"
+                                element={<IPBlockManagement />}
                             />
                         </Route>
                     </Routes>
